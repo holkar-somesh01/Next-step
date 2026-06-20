@@ -39,6 +39,9 @@ const getChatHistory = asyncHandler(async (req, res) => {
     const decryptedChats = chats.map(chat => {
         const chatObj = chat.toObject();
         chatObj.message = decrypt(chatObj.message);
+        if (chatObj.replyTo && chatObj.replyTo.message) {
+            chatObj.replyTo.message = decrypt(chatObj.replyTo.message);
+        }
         return chatObj;
     });
 
@@ -117,6 +120,9 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     const chatObj = newChat.toObject();
     chatObj.message = decrypt(chatObj.message);
+    if (chatObj.replyTo && chatObj.replyTo.message) {
+        chatObj.replyTo.message = decrypt(chatObj.replyTo.message);
+    }
 
     res.status(201).json(chatObj);
 });
@@ -144,6 +150,9 @@ const editMessage = asyncHandler(async (req, res) => {
     
     const chatObj = updatedChat.toObject();
     chatObj.message = decrypt(chatObj.message);
+    if (chatObj.replyTo && chatObj.replyTo.message) {
+        chatObj.replyTo.message = decrypt(chatObj.replyTo.message);
+    }
     
     res.status(200).json(chatObj);
 });

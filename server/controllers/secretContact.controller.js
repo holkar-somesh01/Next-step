@@ -2,6 +2,7 @@ const SecretContact = require('../models/secretContact.model');
 const User = require('../models/user.model');
 const Chat = require('../models/chat.model');
 const asyncHandler = require('express-async-handler');
+const { decrypt } = require('../utils/encryption');
 
 // @desc    Add a new secret contact
 // @route   POST /api/secret-contacts
@@ -106,7 +107,7 @@ const getSecretContacts = asyncHandler(async (req, res) => {
 
             if (lastChat) {
                 contactObj.lastMessage = {
-                    message: lastChat.message,
+                    message: decrypt(lastChat.message),
                     createdAt: lastChat.createdAt
                 };
             } else {

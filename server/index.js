@@ -74,6 +74,18 @@ io.on('connection', (socket) => {
         socket.to(data.room).emit('message_deleted', data);
     });
 
+    socket.on('typing', (data) => {
+        socket.to(data.room).emit('typing', data);
+    });
+
+    socket.on('stop_typing', (data) => {
+        socket.to(data.room).emit('stop_typing', data);
+    });
+
+    socket.on('policy_change', (data) => {
+        socket.to(data.room).emit('policy_change', data);
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         const userId = socketToUser.get(socket.id);

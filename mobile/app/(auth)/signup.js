@@ -17,16 +17,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { useRouter, Link } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useRegisterMutation, useUpdatePublicKeyMutation } from '../../redux/api/authApi';
-import { useDispatch } from 'react-redux';
-import { setCredentials } from '../../redux/slices/authSlice';
-import { generateAndStoreKeyPair } from '../../utils/crypto';
+import { useRegisterMutation } from '../../redux/api/authApi';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SignupScreen() {
   const router = useRouter();
-  const dispatch = useDispatch();
   const { isDark: dark, colors: c } = useTheme();
 
   const [name, setName] = useState('');
@@ -63,24 +59,27 @@ export default function SignupScreen() {
   };
 
   // Focus transition triggers
+   
   useEffect(() => {
     Animated.timing(nameFocusAnim, { toValue: nameFocused ? 1 : 0, duration: 200, useNativeDriver: false }).start();
   }, [nameFocused]);
 
+   
   useEffect(() => {
     Animated.timing(emailFocusAnim, { toValue: emailFocused ? 1 : 0, duration: 200, useNativeDriver: false }).start();
   }, [emailFocused]);
 
+   
   useEffect(() => {
     Animated.timing(mobileFocusAnim, { toValue: mobileFocused ? 1 : 0, duration: 200, useNativeDriver: false }).start();
   }, [mobileFocused]);
 
+   
   useEffect(() => {
     Animated.timing(passFocusAnim, { toValue: passwordFocused ? 1 : 0, duration: 200, useNativeDriver: false }).start();
   }, [passwordFocused]);
 
   const [register, { isLoading }] = useRegisterMutation();
-  const [updatePublicKey] = useUpdatePublicKeyMutation();
 
   const handleSignup = async () => {
     if (!name || !email || !password || !mobile) {
@@ -88,7 +87,7 @@ export default function SignupScreen() {
       return;
     }
     try {
-      const userData = await register({ name, email, password, mobile, role: 'student' }).unwrap();
+      await register({ name, email, password, mobile, role: 'student' }).unwrap();
       
       // Auto-login to sync keys and token
       // Wait, register endpoint currently might not return a token.

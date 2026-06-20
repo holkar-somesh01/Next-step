@@ -6,7 +6,6 @@ import {
   FlatList,
   TextInput,
   StyleSheet,
-  Switch,
   Animated,
   Pressable,
   Image,
@@ -29,7 +28,7 @@ export default function HomeScreen() {
   const user = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
   const router = useRouter();
-  const { isDark, toggleTheme, colors: c } = useTheme();
+  const { isDark, colors: c } = useTheme();
   const { data: schemes, isLoading, isFetching, refetch } = useGetSchemesQuery();
   const [searchText, setSearchText] = useState('');
   const [isChatUnlocked, setIsChatUnlocked] = useState(false);

@@ -62,6 +62,7 @@ export default function NotificationController({ children }) {
         responseListener.current.remove();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, token]);
 
   return <>{children}</>;

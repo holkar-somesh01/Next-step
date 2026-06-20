@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
   KeyboardAvoidingView, Platform, ActivityIndicator, Image, StyleSheet,
-  Alert, Keyboard,
+  Alert, Keyboard, Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,11 +13,14 @@ import {
   useGetChatHistoryQuery,
   useSendMessageMutation,
   useEditMessageMutation,
-  useDeleteMessageMutation
+  useDeleteMessageMutation,
+  useClearChatHistoryMutation,
+  useGetRoomPolicyQuery,
+  useUpdateRoomPolicyMutation
 } from '../../redux/api/chatApi';
 import { useGetUserByIdQuery } from '../../redux/api/userApi';
 import { useTheme } from '../../context/ThemeContext';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 import AppLock from '../../components/AppLock';
 import { encryptMessage, decryptMessage, getPrivateKey } from '../../utils/crypto';
 
@@ -25,13 +28,13 @@ const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL?.replace('/api', '');
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL?.replace('/api', '');
 
 const EMOJI_LIST = [
-  '😀','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪',
-  '🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺',
-  '😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥',
-  '😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧',
-  '😷','🤒','🤕','🤑','🤠','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗',
-  '💖','💘','💝','💟','💌','🎨','🎭','🎬','🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🎻','🎲','🎯','🎳',
-  '🎮','🎰'
+  '😀', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪',
+  '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺',
+  '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥',
+  '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧',
+  '😷', '🤒', '🤕', '🤑', '🤠', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗',
+  '💖', '💘', '💝', '💟', '💌', '🎨', '🎭', '🎬', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎸', '🎻', '🎲', '🎯', '🎳',
+  '🎮', '🎰'
 ];
 
 export default function ChatDetailScreen() {
@@ -44,11 +47,15 @@ export default function ChatDetailScreen() {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [replyingToMessage, setReplyingToMessage] = useState(null);
+  const [deletePolicy, setDeletePolicy] = useState('off');
+  const [showPolicyMenu, setShowPolicyMenu] = useState(false);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
 
   const socket = useRef(null);
   const flatListRef = useRef(null);
   const inputRef = useRef(null);
   const lastTap = useRef({ time: 0, msgId: null });
+  const typingTimeout = useRef(null);
 
   const { data: receiver } = useGetUserByIdQuery(receiverId, {
     skip: !receiverId || !currentUser,
@@ -62,6 +69,8 @@ export default function ChatDetailScreen() {
   const [sendMsgMutation] = useSendMessageMutation();
   const [editMsgMutation] = useEditMessageMutation();
   const [deleteMsgMutation] = useDeleteMessageMutation();
+  const [clearChatMutation] = useClearChatHistoryMutation();
+  const [updateRoomPolicyMutation] = useUpdateRoomPolicyMutation();
   const [chatMessages, setChatMessages] = useState([]);
   const [privateKey, setPrivateKey] = useState(null);
 
@@ -83,6 +92,14 @@ export default function ChatDetailScreen() {
     ? [currentUser._id, receiverId].sort().join('_')
     : null;
 
+  const { data: roomConfig } = useGetRoomPolicyQuery(roomId, { skip: !roomId });
+
+  useEffect(() => {
+    if (roomConfig) {
+      setDeletePolicy(roomConfig.deletePolicy || 'off');
+    }
+  }, [roomConfig]);
+
   useEffect(() => {
     if (!currentUser) router.replace('/(auth)/login');
   }, [currentUser]);
@@ -102,20 +119,20 @@ export default function ChatDetailScreen() {
         setChatMessages(history);
       }
     }
-  }, [history, privateKey, receiver?.publicKey]);
+  }, [history, privateKey, receiver?.publicKey, currentUser]);
 
   useEffect(() => {
     if (!roomId) return;
     socket.current = io(SOCKET_URL);
     socket.current.emit('join_room', roomId);
-    
+
     socket.current.on('receive_message', (data) => {
       let finalData = { ...data };
       const pk = privateKeyRef.current;
       const pubk = receiverPubKeyRef.current;
       if (data.isEncrypted && data.encryptedContent && pk && pubk) {
-          const decrypted = decryptMessage(data.encryptedContent, data.iv, pubk, pk);
-          finalData.message = decrypted || "[Encryption Error: Decryption Failed]";
+        const decrypted = decryptMessage(data.encryptedContent, data.iv, pubk, pk);
+        finalData.message = decrypted || "[Encryption Error: Decryption Failed]";
       }
       setChatMessages(prev => [...prev, finalData]);
     });
@@ -128,6 +145,22 @@ export default function ChatDetailScreen() {
 
     socket.current.on('message_deleted', (data) => {
       setChatMessages(prev => prev.filter(m => m._id !== data.messageId));
+    });
+
+    socket.current.on('typing', (data) => {
+      if (data.sender !== currentUser?._id) {
+        setIsOtherTyping(true);
+      }
+    });
+
+    socket.current.on('stop_typing', (data) => {
+      if (data.sender !== currentUser?._id) {
+        setIsOtherTyping(false);
+      }
+    });
+
+    socket.current.on('policy_change', (data) => {
+      setDeletePolicy(data.policy);
     });
 
     return () => {
@@ -170,8 +203,8 @@ export default function ChatDetailScreen() {
           }
         }
 
-        const payload = { 
-          messageId: editingMessageId, 
+        const payload = {
+          messageId: editingMessageId,
           message: isEncrypted ? undefined : finalMessage,
           encryptedContent,
           iv,
@@ -193,7 +226,7 @@ export default function ChatDetailScreen() {
     } else {
       // Send new message flow
       const tempId = `temp-${Date.now()}`;
-      
+
       let isEncrypted = false;
       let encryptedContent = null;
       let iv = null;
@@ -224,34 +257,35 @@ export default function ChatDetailScreen() {
           message: replyingToMessage.message,
           sender: {
             _id: replyingToMessage.sender,
-            name: replyingToMessage.sender === currentUser._id 
-              ? currentUser.name 
+            name: replyingToMessage.sender === currentUser._id
+              ? currentUser.name
               : (receiver?.name || contactName || 'User')
           }
         } : null
       };
-      
+
       const currentReplyToId = replyingToMessage?._id;
       setReplyingToMessage(null);
-      
+
       // Optimitic update
       setChatMessages(prev => [...prev, messageData]);
       setMessage('');
-      
+
       try {
-        const result = await sendMsgMutation({ 
-          receiverId, 
-          message: isEncrypted ? undefined : finalMessage, 
+        const result = await sendMsgMutation({
+          receiverId,
+          message: isEncrypted ? undefined : finalMessage,
           encryptedContent,
           iv,
           isEncrypted,
           encryptionVersion,
           room: roomId,
-          replyTo: currentReplyToId
+          replyTo: currentReplyToId,
+          deletePolicy
         }).unwrap();
         // Provide the decrypted message back for the sender's own sockets if needed (e.g. web/mobile sync), but here it's purely for the recipient
         socket.current.emit('send_message', result);
-        
+
         // Swap temp message with official database record containing real _id
         setChatMessages(prev =>
           prev.map(m => (m._id === tempId ? result : m))
@@ -323,6 +357,45 @@ export default function ChatDetailScreen() {
     }
   };
 
+  const handleClearChat = () => {
+    Alert.alert(
+      'Clear Chat',
+      'Are you sure you want to delete all messages in this chat? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Clear', 
+          style: 'destructive',
+          onPress: async () => {
+            setShowPolicyMenu(false);
+            try {
+              await clearChatMutation(receiverId).unwrap();
+              setChatMessages([]);
+            } catch (err) {
+              console.error('Failed to clear chat:', err);
+              Alert.alert('Error', 'Failed to clear chat history');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handlePolicyChange = async (policy) => {
+    setDeletePolicy(policy);
+    setShowPolicyMenu(false);
+    if (roomId) {
+      try {
+        await updateRoomPolicyMutation({ room: roomId, deletePolicy: policy }).unwrap();
+        if (socket.current) {
+          socket.current.emit('policy_change', { room: roomId, policy });
+        }
+      } catch (err) {
+        console.error('Failed to update room policy', err);
+      }
+    }
+  };
+
   const formatTime = (dateString) =>
     new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -372,6 +445,17 @@ export default function ChatDetailScreen() {
                 <Text style={[styles.onlineText, { color: c.subText }]}>Active now</Text>
               </View>
             </View>
+
+            <TouchableOpacity
+              onPress={() => setShowPolicyMenu(true)}
+              style={{ padding: 8 }}
+            >
+              <Ionicons
+                name={deletePolicy === 'off' ? 'timer-outline' : deletePolicy === '24hr' ? 'timer' : deletePolicy === '7days' ? 'calendar-outline' : 'flame'}
+                size={22}
+                color={deletePolicy === 'off' ? c.subText : deletePolicy === '24hr' ? '#EAB308' : deletePolicy === '7days' ? '#8B5CF6' : '#EF4444'}
+              />
+            </TouchableOpacity>
           </View>
 
           {/* ── Messages ── */}
@@ -406,11 +490,11 @@ export default function ChatDetailScreen() {
                           isMine
                             ? { backgroundColor: '#2563EB', borderTopRightRadius: 4 }
                             : {
-                                backgroundColor: c.card,
-                                borderTopLeftRadius: 4,
-                                borderWidth: 1,
-                                borderColor: c.cardBorder,
-                              },
+                              backgroundColor: c.card,
+                              borderTopLeftRadius: 4,
+                              borderWidth: 1,
+                              borderColor: c.cardBorder,
+                            },
                         ]}
                       >
                         {item.replyTo && item.replyTo.message && (
@@ -424,8 +508,8 @@ export default function ChatDetailScreen() {
                               styles.replyQuoteSender,
                               { color: isMine ? '#E0F2FE' : '#2563EB' }
                             ]} numberOfLines={1}>
-                              {item.replyTo.sender?._id === currentUser._id 
-                                ? 'You' 
+                              {item.replyTo.sender?._id === currentUser._id
+                                ? 'You'
                                 : (item.replyTo.sender?.name || contactName || receiver?.name || 'User')}
                             </Text>
                             <Text style={[
@@ -451,6 +535,13 @@ export default function ChatDetailScreen() {
                 }}
               />
             )}
+            {isOtherTyping && (
+              <View style={{ paddingHorizontal: 16, paddingVertical: 8, marginBottom: 8 }}>
+                <Text style={{ fontSize: 12, color: c.subText, fontStyle: 'italic' }}>
+                  {contactName || receiver?.name || 'User'} is typing...
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* ── Editing Indicator Banner ── */}
@@ -458,7 +549,7 @@ export default function ChatDetailScreen() {
             <View style={[styles.editingBanner, { backgroundColor: isDark ? '#1e1e35' : '#F1F5F9', borderTopColor: c.cardBorder }]}>
               <Ionicons name="pencil" size={15} color="#2563EB" />
               <Text style={[styles.editingText, { color: c.text }]}>Editing message...</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => { setEditingMessageId(null); setMessage(''); }}
                 style={styles.cancelEditBtn}
               >
@@ -473,15 +564,15 @@ export default function ChatDetailScreen() {
               <Ionicons name="arrow-undo" size={15} color="#2563EB" />
               <View style={{ flex: 1 }}>
                 <Text style={[styles.editingText, { color: c.text }]} numberOfLines={1}>
-                  Replying to {replyingToMessage.sender === currentUser._id 
-                    ? 'yourself' 
+                  Replying to {replyingToMessage.sender === currentUser._id
+                    ? 'yourself'
                     : (contactName || receiver?.name || 'User')}
                 </Text>
                 <Text style={{ fontSize: 11, color: c.subText }} numberOfLines={1}>
                   {replyingToMessage.message}
                 </Text>
               </View>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setReplyingToMessage(null)}
                 style={styles.cancelEditBtn}
               >
@@ -500,10 +591,19 @@ export default function ChatDetailScreen() {
                 style={[styles.input, { color: c.text }]}
                 multiline
                 value={message}
-                onChangeText={setMessage}
+                onChangeText={(text) => {
+                  setMessage(text);
+                  if (socket.current && roomId) {
+                    socket.current.emit('typing', { room: roomId, sender: currentUser._id });
+                    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+                    typingTimeout.current = setTimeout(() => {
+                      socket.current.emit('stop_typing', { room: roomId, sender: currentUser._id });
+                    }, 1500);
+                  }
+                }}
                 onFocus={() => setShowEmojiPicker(false)}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={toggleEmojiPicker}
                 style={styles.emojiToggleBtn}
                 activeOpacity={0.7}
@@ -521,10 +621,10 @@ export default function ChatDetailScreen() {
               ]}
               activeOpacity={0.85}
             >
-              <Ionicons 
-                name={editingMessageId ? "checkmark" : "paper-plane"} 
-                size={18} 
-                color={message.trim() ? '#fff' : c.icon} 
+              <Ionicons
+                name={editingMessageId ? "checkmark" : "paper-plane"}
+                size={18}
+                color={message.trim() ? '#fff' : c.icon}
               />
             </TouchableOpacity>
           </View>
@@ -546,7 +646,7 @@ export default function ChatDetailScreen() {
                 contentContainerStyle={{ padding: 8 }}
                 style={{ flex: 1 }}
                 renderItem={({ item }) => (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     onPress={() => setMessage(prev => prev + item)}
                     style={styles.emojiGridCell}
                   >
@@ -556,6 +656,51 @@ export default function ChatDetailScreen() {
               />
             </View>
           )}
+
+          {/* ── Auto-Delete Policy Modal ── */}
+          <Modal visible={showPolicyMenu} transparent animationType="fade">
+            <TouchableOpacity
+              style={styles.modalOverlay}
+              activeOpacity={1}
+              onPress={() => setShowPolicyMenu(false)}
+            >
+              <TouchableOpacity activeOpacity={1} style={[styles.policyMenu, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
+                <Text style={[styles.policyMenuTitle, { color: c.text }]}>Auto-Delete Messages</Text>
+
+                <TouchableOpacity style={styles.policyOption} onPress={() => handlePolicyChange('off')}>
+                  <Ionicons name="timer-outline" size={20} color={c.subText} />
+                  <Text style={[styles.policyOptionText, { color: c.text }]}>Off (Keep messages)</Text>
+                  {deletePolicy === 'off' && <Ionicons name="checkmark" size={20} color="#2563EB" />}
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.policyOption} onPress={() => handlePolicyChange('immediately')}>
+                  <Ionicons name="flame" size={20} color="#EF4444" />
+                  <Text style={[styles.policyOptionText, { color: c.text }]}>After Viewing</Text>
+                  {deletePolicy === 'immediately' && <Ionicons name="checkmark" size={20} color="#2563EB" />}
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.policyOption} onPress={() => handlePolicyChange('24hr')}>
+                  <Ionicons name="timer" size={20} color="#EAB308" />
+                  <Text style={[styles.policyOptionText, { color: c.text }]}>After 24 Hours</Text>
+                  {deletePolicy === '24hr' && <Ionicons name="checkmark" size={20} color="#2563EB" />}
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.policyOption} onPress={() => handlePolicyChange('7days')}>
+                  <Ionicons name="calendar-outline" size={20} color="#8B5CF6" />
+                  <Text style={[styles.policyOptionText, { color: c.text }]}>After 7 Days</Text>
+                  {deletePolicy === '7days' && <Ionicons name="checkmark" size={20} color="#2563EB" />}
+                </TouchableOpacity>
+
+                <View style={{ height: 1, backgroundColor: c.cardBorder, marginVertical: 4 }} />
+                
+                <TouchableOpacity style={[styles.policyOption, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]} onPress={handleClearChat}>
+                  <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                  <Text style={[styles.policyOptionText, { color: '#EF4444' }]}>Clear Chat History</Text>
+                </TouchableOpacity>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </Modal>
+
         </SafeAreaView>
       </KeyboardAvoidingView>
     </AppLock>
@@ -675,5 +820,40 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  /* Policy Modal */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  policyMenu: {
+    width: '85%',
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 18,
+    gap: 12,
+  },
+  policyMenuTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 8,
+    textAlign: 'center'
+  },
+  policyOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    gap: 12,
+    borderRadius: 8,
+    backgroundColor: 'rgba(150,150,150,0.08)'
+  },
+  policyOptionText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500'
   },
 });

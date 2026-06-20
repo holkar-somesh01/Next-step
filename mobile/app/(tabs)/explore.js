@@ -25,7 +25,6 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [mobile, setMobile] = useState(user?.mobile || '');
   const [localImage, setLocalImage] = useState(null);
 
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
@@ -33,7 +32,6 @@ export default function ProfileScreen() {
   useEffect(() => {
     setName(user?.name || '');
     setEmail(user?.email || '');
-    setMobile(user?.mobile || '');
   }, [user]);
 
   const initials = user?.name
@@ -88,7 +86,6 @@ export default function ProfileScreen() {
   const handleCancel = () => {
     setName(user?.name || '');
     setEmail(user?.email || '');
-    setMobile(user?.mobile || '');
     setLocalImage(null);
     setIsEditing(false);
   };

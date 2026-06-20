@@ -57,6 +57,7 @@ export default function LoginScreen() {
     ]).start();
   };
 
+   
   useEffect(() => {
     if (registered === 'true') {
       showToast('Registration successful! Please login.', 'success');
@@ -64,6 +65,7 @@ export default function LoginScreen() {
   }, [registered]);
 
   // Animate email input focus
+   
   useEffect(() => {
     Animated.timing(emailFocusAnim, {
       toValue: emailFocused ? 1 : 0,
@@ -73,6 +75,7 @@ export default function LoginScreen() {
   }, [emailFocused]);
 
   // Animate password input focus
+   
   useEffect(() => {
     Animated.timing(passFocusAnim, {
       toValue: passwordFocused ? 1 : 0,
@@ -265,7 +268,7 @@ export default function LoginScreen() {
 
           {/* Create account link */}
           <View style={styles.bottomRow}>
-            <Text style={[styles.bottomPrompt, { color: c.subText }]}>Don't have an account? </Text>
+            <Text style={[styles.bottomPrompt, { color: c.subText }]}>Don&apos;t have an account? </Text>
             <Link href="/(auth)/signup" asChild>
               <TouchableOpacity activeOpacity={0.7}>
                 <Text style={styles.bottomLink}>Sign Up</Text>

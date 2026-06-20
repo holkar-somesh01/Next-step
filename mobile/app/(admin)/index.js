@@ -60,7 +60,7 @@ export default function AdminDashboard() {
           onPress: async () => {
             try {
               await deleteScheme(id).unwrap();
-            } catch (err) {
+            } catch (_err) {
               Alert.alert('Error', 'Failed to delete scheme');
             }
           }

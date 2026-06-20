@@ -102,9 +102,6 @@ export default function AppLock({ children }) {
   }
 
   const bg = isDark ? '#0a0a14' : '#1E3A8A';
-  const cardBg = isDark ? '#1A1A2E' : '#fff';
-  const textColor = isDark ? '#F1F5F9' : '#0F172A';
-  const subColor = isDark ? '#94A3B8' : '#64748B';
 
   return (
     <>

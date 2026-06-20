@@ -43,6 +43,18 @@ export const chatApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['SecretContact', 'Chat'],
     }),
+    getRoomPolicy: builder.query({
+      query: (room) => `/chats/config/${room}`,
+      providesTags: ['ChatConfig'],
+    }),
+    updateRoomPolicy: builder.mutation({
+      query: (data) => ({
+        url: `/chats/config/${data.room}`,
+        method: 'PUT',
+        body: { deletePolicy: data.deletePolicy },
+      }),
+      invalidatesTags: ['ChatConfig'],
+    }),
   }),
 });
 
@@ -53,4 +65,6 @@ export const {
   useDeleteMessageMutation,
   useClearChatHistoryMutation,
   useMarkAsReadMutation,
+  useGetRoomPolicyQuery,
+  useUpdateRoomPolicyMutation,
 } = chatApi;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity,
-  ActivityIndicator, Image, Modal, Alert, StyleSheet, Switch, Linking
+  ActivityIndicator, Image, Modal, Alert, StyleSheet, Linking
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,12 +25,12 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import { ContactRowSkeleton } from '../../components/Skeleton';
 import AppLock from '../../components/AppLock';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 export default function ChatsScreen() {
   const router = useRouter();
   const currentUser = useSelector(selectCurrentUser);
-  const { isDark, toggleTheme, colors: c } = useTheme();
+  const { isDark, colors: c } = useTheme();
   const { data: contacts, isLoading, isFetching, refetch } = useGetSecretContactsQuery();
   const [addSecretContact, { isLoading: isAdding }] = useAddSecretContactMutation();
   const [updateSecretContact] = useUpdateSecretContactMutation();
@@ -66,10 +66,12 @@ export default function ChatsScreen() {
       contact.mobile.includes(search))
   );
 
+   
   useEffect(() => {
     if (!currentUser) router.replace('/(auth)/login');
   }, [currentUser]);
 
+   
   useEffect(() => {
     if (!currentUser?._id) return;
     socket.current = io(SOCKET_URL);

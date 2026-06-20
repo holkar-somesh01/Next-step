@@ -59,13 +59,14 @@ export default function SplashScreen() {
             return;
           }
         }
-      } catch (e) {
+      } catch (_e) {
         // Fallback on error
       }
       setTimeout(() => router.replace('/(auth)/login'), 2500);
     };
 
     checkSession();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

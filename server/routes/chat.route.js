@@ -9,5 +9,7 @@ router.put('/:messageId', protect, editMessage);
 router.delete('/:messageId', protect, deleteMessage);
 router.delete('/clear/:receiverId', protect, clearChatHistory);
 router.put('/read/:senderId', protect, markAsRead);
+router.put('/config/:room', protect, require('../controllers/chat.controller').updateRoomPolicy);
+router.get('/config/:room', protect, require('../controllers/chat.controller').getRoomPolicy);
 
 module.exports = router;

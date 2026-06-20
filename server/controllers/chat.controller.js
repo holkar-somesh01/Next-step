@@ -1,6 +1,7 @@
 const Chat = require('../models/chat.model');
 const SecretContact = require('../models/secretContact.model');
 const User = require('../models/user.model');
+const RoomConfig = require('../models/roomConfig.model');
 const asyncHandler = require('express-async-handler');
 const { activeUsers, sendPushNotification } = require('../utils/notification');
 const { encrypt, decrypt } = require('../utils/encryption');
@@ -24,6 +25,12 @@ const getChatHistory = asyncHandler(async (req, res) => {
     });
 
     // Mark incoming messages from the receiver to the sender as read
+    // For 'immediately' delete policy, set expiresAt to now so it gets deleted
+    await Chat.updateMany(
+        { sender: receiverId, receiver: senderId, isRead: false, deletePolicy: 'immediately' },
+        { $set: { isRead: true, expiresAt: new Date() } }
+    );
+
     await Chat.updateMany(
         { sender: receiverId, receiver: senderId, isRead: false },
         { $set: { isRead: true } }
@@ -52,7 +59,7 @@ const getChatHistory = asyncHandler(async (req, res) => {
 // @route   POST /api/chats
 // @access  Private
 const sendMessage = asyncHandler(async (req, res) => {
-    const { receiverId, message, room, replyTo } = req.body;
+    const { receiverId, message, room, replyTo, deletePolicy } = req.body;
     const senderId = req.user._id;
 
     // Check blocked status
@@ -75,12 +82,21 @@ const sendMessage = asyncHandler(async (req, res) => {
         throw new Error('You have blocked this user. Unblock them to send a message.');
     }
 
+    let expiresAt = null;
+    if (deletePolicy === '24hr') {
+        expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    } else if (deletePolicy === '7days') {
+        expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    }
+
     let newChat = await Chat.create({
         sender: senderId,
         receiver: receiverId,
         message: encrypt(message),
         room,
-        replyTo: replyTo || null
+        replyTo: replyTo || null,
+        deletePolicy: deletePolicy || 'off',
+        expiresAt
     });
 
     // Populate replyTo and its sender nestedly
@@ -202,6 +218,12 @@ const markAsRead = asyncHandler(async (req, res) => {
     const { senderId } = req.params;
     const receiverId = req.user._id;
 
+    // For 'immediately' delete policy, set expiresAt to now so it gets deleted
+    await Chat.updateMany(
+        { sender: senderId, receiver: receiverId, isRead: false, deletePolicy: 'immediately' },
+        { $set: { isRead: true, expiresAt: new Date() } }
+    );
+
     await Chat.updateMany(
         { sender: senderId, receiver: receiverId, isRead: false },
         { $set: { isRead: true } }
@@ -216,11 +238,38 @@ const markAsRead = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, message: 'All messages marked as read' });
 });
 
+// @desc    Update room config
+// @route   PUT /api/chats/config/:room
+// @access  Private
+const updateRoomPolicy = asyncHandler(async (req, res) => {
+    const { room } = req.params;
+    const { deletePolicy } = req.body;
+    let config = await RoomConfig.findOne({ room });
+    if (!config) {
+        config = await RoomConfig.create({ room, deletePolicy });
+    } else {
+        config.deletePolicy = deletePolicy;
+        await config.save();
+    }
+    res.status(200).json(config);
+});
+
+// @desc    Get room config
+// @route   GET /api/chats/config/:room
+// @access  Private
+const getRoomPolicy = asyncHandler(async (req, res) => {
+    const { room } = req.params;
+    const config = await RoomConfig.findOne({ room });
+    res.status(200).json(config || { room, deletePolicy: 'off' });
+});
+
 module.exports = {
     getChatHistory,
     sendMessage,
     editMessage,
     deleteMessage,
     clearChatHistory,
-    markAsRead
+    markAsRead,
+    updateRoomPolicy,
+    getRoomPolicy
 };

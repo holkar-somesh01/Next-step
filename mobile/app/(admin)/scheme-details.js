@@ -30,7 +30,7 @@ export default function AdminSchemeDetails() {
               await deleteScheme(id).unwrap();
               Alert.alert('Success', 'Scheme deleted successfully');
               router.back();
-            } catch (err) {
+            } catch (_err) {
               Alert.alert('Error', 'Failed to delete scheme');
             }
           }
@@ -46,7 +46,7 @@ export default function AdminSchemeDetails() {
       } else {
         Alert.alert('Error', 'Cannot open this link');
       }
-    } catch (e) {
+    } catch (_e) {
       Alert.alert('Error', 'An error occurred while trying to open the link');
     }
   };

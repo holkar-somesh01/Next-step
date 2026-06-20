@@ -15,7 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 export default function ContactScreen() {
   const router = useRouter();
   const user = useSelector(selectCurrentUser);
-  const { isDark, colors: c } = useTheme();
+  const { colors: c } = useTheme();
 
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');

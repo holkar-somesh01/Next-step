@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  ScrollView, Alert, ActivityIndicator,
+  ScrollView, ActivityIndicator,
   KeyboardAvoidingView, Platform, StyleSheet, Animated, Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCurrentUser, selectCurrentToken, setCredentials } from '../redux/slices/authSlice';
-import { useChangePasswordMutation, useSetSecretCodeMutation, useResetSecretCodeMutation, useSetAppLockCodeMutation, useDisableAppLockCodeMutation } from '../redux/api/userApi';
+import { useChangePasswordMutation, useSetSecretCodeMutation, useSetAppLockCodeMutation, useDisableAppLockCodeMutation } from '../redux/api/userApi';
 import { useTheme } from '../context/ThemeContext';
 
 /* ── Reusable sub-components ── */

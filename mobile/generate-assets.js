@@ -1,3 +1,4 @@
+/* eslint-env node */
 /**
  * Next Step - Asset Generation Script
  * 
@@ -18,7 +19,7 @@ const run = async () => {
   let Jimp;
   try {
     Jimp = require('jimp');
-  } catch (err) {
+  } catch (_err) {
     console.error('\x1b[31mError: "jimp" library is not installed.\x1b[0m');
     console.log('Please run the following command first:');
     console.log('\x1b[36mnpm install jimp\x1b[0m');

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "next_step",
+    "name": "Next Step",
     "slug": "next_step",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,9 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.somesh.nextstep"
     },
     "android": {
+      "package": "com.somesh.nextstep",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

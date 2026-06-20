@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+dotenv.config();
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -11,8 +12,6 @@ const schemeRoutes = require('./routes/scheme.route');
 const contactRoutes = require('./routes/contact.route');
 const examRoutes = require('./routes/exam.route');
 const secretContactRoutes = require('./routes/secretContact.route');
-
-dotenv.config();
 
 const app = express();
 const server = http.createServer(app);

@@ -3,7 +3,7 @@ const SecretContact = require('../models/secretContact.model');
 const User = require('../models/user.model');
 const asyncHandler = require('express-async-handler');
 const { activeUsers, sendPushNotification } = require('../utils/notification');
-
+const { encrypt, decrypt } = require('../utils/encryption');
 // @desc    Get chat history between two users
 // @route   GET /api/chats/:receiverId
 // @access  Private
@@ -36,7 +36,13 @@ const getChatHistory = asyncHandler(async (req, res) => {
         await contact.save();
     }
 
-    res.status(200).json(chats);
+    const decryptedChats = chats.map(chat => {
+        const chatObj = chat.toObject();
+        chatObj.message = decrypt(chatObj.message);
+        return chatObj;
+    });
+
+    res.status(200).json(decryptedChats);
 });
 
 // @desc    Save a new message
@@ -69,7 +75,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     let newChat = await Chat.create({
         sender: senderId,
         receiver: receiverId,
-        message,
+        message: encrypt(message),
         room,
         replyTo: replyTo || null
     });
@@ -109,7 +115,10 @@ const sendMessage = asyncHandler(async (req, res) => {
         sendPushNotification(receiverId).catch(err => console.error('[Notification] Error dispatching async push notification:', err));
     }
 
-    res.status(201).json(newChat);
+    const chatObj = newChat.toObject();
+    chatObj.message = decrypt(chatObj.message);
+
+    res.status(201).json(chatObj);
 });
 
 // @desc    Edit a message
@@ -130,9 +139,13 @@ const editMessage = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to edit this message');
     }
 
-    chat.message = message;
+    chat.message = encrypt(message);
     const updatedChat = await chat.save();
-    res.status(200).json(updatedChat);
+    
+    const chatObj = updatedChat.toObject();
+    chatObj.message = decrypt(chatObj.message);
+    
+    res.status(200).json(chatObj);
 });
 
 // @desc    Delete a message

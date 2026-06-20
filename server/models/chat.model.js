@@ -26,6 +26,11 @@ const chatSchema = new mongoose.Schema({
     timestamp: {
         type: Date,
         default: Date.now
+    },
+    replyTo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Chat',
+        default: null
     }
 }, {
     timestamps: true

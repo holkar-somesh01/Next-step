@@ -11,6 +11,20 @@ export default function AdminLayout() {
         }}
       />
       <Stack.Screen
+        name="scheme-list"
+        options={{
+          title: 'All Schemes',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="scheme-details"
+        options={{
+          title: 'Scheme Details',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="schemes"
         options={{
           title: 'Scheme Form',

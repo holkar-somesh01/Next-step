@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Linking, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -39,7 +39,11 @@ export default function AboutScreen() {
         {/* Hero */}
         <View style={styles.hero}>
           <View style={styles.heroIcon}>
-            <Ionicons name="school" size={38} color="#fff" />
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={styles.logoIcon}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.heroTitle}>Next Step</Text>
           <Text style={styles.heroSub}>Empowering students with the right educational schemes</Text>
@@ -117,9 +121,16 @@ const styles = StyleSheet.create({
     padding: 28, alignItems: 'center', marginBottom: 16,
   },
   heroIcon: {
-    width: 76, height: 76, borderRadius: 38,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center', justifyContent: 'center', marginBottom: 14,
+  },
+  logoIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 12,
   },
   heroTitle: { color: '#fff', fontSize: 24, fontWeight: '800' },
   heroSub: { color: 'rgba(255,255,255,0.8)', fontSize: 13, marginTop: 6, textAlign: 'center', lineHeight: 19 },

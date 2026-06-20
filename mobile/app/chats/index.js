@@ -8,7 +8,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../redux/slices/authSlice';
-import { useGetSecretContactsQuery, useAddSecretContactMutation } from '../../redux/api/secretContactApi';
+import { 
+  useGetSecretContactsQuery, 
+  useAddSecretContactMutation,
+  useUpdateSecretContactMutation,
+  useDeleteSecretContactMutation 
+} from '../../redux/api/secretContactApi';
+import { useClearChatHistoryMutation, useMarkAsReadMutation } from '../../redux/api/chatApi';
+import {
+  useBlockUserMutation,
+  useUnblockUserMutation,
+  useMuteUserMutation,
+  useUnmuteUserMutation,
+  useReportUserMutation,
+} from '../../redux/api/userApi';
 import { useTheme } from '../../context/ThemeContext';
 import { ContactRowSkeleton } from '../../components/Skeleton';
 import AppLock from '../../components/AppLock';
@@ -20,11 +33,28 @@ export default function ChatsScreen() {
   const { isDark, toggleTheme, colors: c } = useTheme();
   const { data: contacts, isLoading, isFetching, refetch } = useGetSecretContactsQuery();
   const [addSecretContact, { isLoading: isAdding }] = useAddSecretContactMutation();
-
+  const [updateSecretContact] = useUpdateSecretContactMutation();
+  const [deleteSecretContact] = useDeleteSecretContactMutation();
+  const [clearChatHistory] = useClearChatHistoryMutation();
+  const [markAsRead] = useMarkAsReadMutation();
+  const [blockUser] = useBlockUserMutation();
+  const [unblockUser] = useUnblockUserMutation();
+  const [muteUser] = useMuteUserMutation();
+  const [unmuteUser] = useUnmuteUserMutation();
+  const [reportUser] = useReportUserMutation();
+ 
   const [search, setSearch] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [newContactName, setNewContactName] = useState('');
   const [newContactMobile, setNewContactMobile] = useState('');
+
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingContact, setEditingContact] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editMobile, setEditMobile] = useState('');
+
+  const [optionsModalVisible, setOptionsModalVisible] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
 
   const BASE_URL = process.env.EXPO_PUBLIC_API_URL?.replace('/api', '');
   const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL?.replace('/api', '');
@@ -106,6 +136,147 @@ export default function ChatsScreen() {
     }
   };
 
+  const handleLongPressContact = (item) => {
+    setSelectedContact(item);
+    setOptionsModalVisible(true);
+  };
+
+  const handleTogglePin = async (id, currentlyPinned) => {
+    try {
+      await updateSecretContact({ id, isPinned: !currentlyPinned }).unwrap();
+    } catch (err) {
+      Alert.alert('Error', err.data?.message || 'Failed to toggle pin status');
+    }
+  };
+
+  const handleToggleUnread = async (item) => {
+    try {
+      const isMarkedUnread = item.isMarkedUnread;
+      const hasUnread = item.unreadCount > 0 || isMarkedUnread;
+      
+      if (hasUnread) {
+        if (item.contactUserId) {
+          await markAsRead(item.contactUserId._id).unwrap();
+        }
+        await updateSecretContact({ id: item._id, isMarkedUnread: false }).unwrap();
+      } else {
+        await updateSecretContact({ id: item._id, isMarkedUnread: true }).unwrap();
+      }
+    } catch (err) {
+      Alert.alert('Error', err.data?.message || 'Failed to toggle unread status');
+    }
+  };
+
+  const startEditContact = (item) => {
+    setEditingContact(item);
+    setEditName(item.name);
+    setEditMobile(item.mobile);
+    setEditModalVisible(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editName || !editMobile) {
+      Alert.alert('Error', 'Please fill all fields');
+      return;
+    }
+    try {
+      await updateSecretContact({ id: editingContact._id, name: editName, mobile: editMobile }).unwrap();
+      Alert.alert('Success', 'Contact updated successfully');
+      setEditModalVisible(false);
+      setEditingContact(null);
+    } catch (err) {
+      Alert.alert('Error', err.data?.message || 'Failed to update contact');
+    }
+  };
+
+  const confirmClearChat = (receiverId, name) => {
+    Alert.alert(
+      'Delete Chat',
+      `Are you sure you want to delete all chat messages with ${name}? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', onPress: () => handleClearChat(receiverId), style: 'destructive' }
+      ]
+    );
+  };
+
+  const handleClearChat = async (receiverId) => {
+    try {
+      await clearChatHistory(receiverId).unwrap();
+      Alert.alert('Success', 'Chat history cleared');
+    } catch (err) {
+      Alert.alert('Error', err.data?.message || 'Failed to clear chat history');
+    }
+  };
+
+  const handleToggleMute = async (userId, currentlyMuted) => {
+    try {
+      if (currentlyMuted) {
+        await unmuteUser({ userId }).unwrap();
+        Alert.alert('Success', 'Notifications unmuted');
+      } else {
+        await muteUser({ userId }).unwrap();
+        Alert.alert('Success', 'Notifications muted');
+      }
+    } catch (err) {
+      Alert.alert('Error', err.data?.message || 'Failed to toggle mute state');
+    }
+  };
+
+  const handleToggleBlock = async (userId, currentlyBlocked) => {
+    try {
+      if (currentlyBlocked) {
+        await unblockUser({ userId }).unwrap();
+        Alert.alert('Success', 'User unblocked');
+      } else {
+        await blockUser({ userId }).unwrap();
+        Alert.alert('Success', 'User blocked');
+      }
+    } catch (err) {
+      Alert.alert('Error', err.data?.message || 'Failed to toggle block state');
+    }
+  };
+
+  const confirmReportUser = (userId, name) => {
+    Alert.alert(
+      'Report & Block User',
+      `Are you sure you want to report ${name}? Reporting will automatically block this user and report their behavior to admins.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Report', onPress: () => handleReportUser(userId), style: 'destructive' }
+      ]
+    );
+  };
+
+  const handleReportUser = async (userId) => {
+    try {
+      await reportUser({ userId }).unwrap();
+      Alert.alert('Success', 'User reported and blocked');
+    } catch (err) {
+      Alert.alert('Error', err.data?.message || 'Failed to report user');
+    }
+  };
+
+  const confirmRemoveContact = (id, name) => {
+    Alert.alert(
+      'Remove Contact',
+      `Are you sure you want to remove ${name} from your Next Step contacts?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Remove', onPress: () => handleRemoveContact(id), style: 'destructive' }
+      ]
+    );
+  };
+
+  const handleRemoveContact = async (id) => {
+    try {
+      await deleteSecretContact(id).unwrap();
+      Alert.alert('Success', 'Contact removed');
+    } catch (err) {
+      Alert.alert('Error', err.data?.message || 'Failed to remove contact');
+    }
+  };
+
   return (
     <AppLock>
       <SafeAreaView style={[styles.container, { backgroundColor: c.bg }]}>
@@ -164,6 +335,7 @@ export default function ChatsScreen() {
                       { text: 'Invite via WhatsApp', onPress: () => handleInviteWhatsApp(item.mobile) }
                     ])
               }
+              onLongPress={() => handleLongPressContact(item)}
               style={[styles.contactRow, { borderBottomColor: c.cardBorder }]}
               activeOpacity={0.75}
             >
@@ -181,7 +353,15 @@ export default function ChatsScreen() {
 
               {/* Info */}
               <View style={{ flex: 1 }}>
-                <Text style={[styles.contactName, { color: c.text, marginBottom: 4 }]}>{item.name}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <Text style={[styles.contactName, { color: c.text }]}>{item.name}</Text>
+                  {item.isPinned && <Ionicons name="pin" size={13} color="#2563EB" style={{ transform: [{ rotate: '45deg' }] }} />}
+                  {item.isBlocked && (
+                    <View style={[styles.blockedBadge, { backgroundColor: isDark ? '#374151' : '#E5E7EB' }]}>
+                      <Text style={[styles.blockedBadgeText, { color: c.subText }]}>Blocked</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={[styles.contactPreview, { color: c.subText }]} numberOfLines={1}>
                   {item.contactUserId
                     ? (item.lastMessage?.message || 'No messages yet')
@@ -189,19 +369,24 @@ export default function ChatsScreen() {
                 </Text>
               </View>
 
-              {/* Right Side Info (Time + Unread Badge) */}
+              {/* Right Side Info (Time + Mute + Unread Badge) */}
               {item.contactUserId && (
                 <View style={{ alignItems: 'flex-end', justifyContent: 'center', gap: 5, paddingLeft: 10 }}>
-                  {item.lastMessage?.createdAt ? (
-                    <Text style={[styles.contactTime, { color: c.subText }]}>
-                      {formatTime(item.lastMessage.createdAt)}
-                    </Text>
-                  ) : null}
-                  {item.unreadCount > 0 && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    {item.isMuted && <Ionicons name="volume-mute" size={13} color={c.subText} style={{ marginRight: 2 }} />}
+                    {item.lastMessage?.createdAt ? (
+                      <Text style={[styles.contactTime, { color: c.subText }]}>
+                        {formatTime(item.lastMessage.createdAt)}
+                      </Text>
+                    ) : null}
+                  </View>
+                  {item.unreadCount > 0 ? (
                     <View style={styles.unreadBadge}>
                       <Text style={styles.unreadBadgeText}>{item.unreadCount}</Text>
                     </View>
-                  )}
+                  ) : item.isMarkedUnread ? (
+                    <View style={styles.unreadGreenDot} />
+                  ) : null}
                 </View>
               )}
 
@@ -249,7 +434,7 @@ export default function ChatsScreen() {
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: c.text }]}>New Contact</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close-circle" size={28} color={c.subText} />
+                <Ionicons name="close" size={24} color={c.text} />
               </TouchableOpacity>
             </View>
 
@@ -289,6 +474,200 @@ export default function ChatsScreen() {
                 : <Text style={styles.modalBtnText}>Save Contact</Text>
               }
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Edit Contact Modal ── */}
+      <Modal animationType="slide" transparent visible={editModalVisible} onRequestClose={() => { setEditModalVisible(false); setEditingContact(null); }}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalSheet, { backgroundColor: c.card }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: c.text }]}>Edit Contact</Text>
+              <TouchableOpacity onPress={() => { setEditModalVisible(false); setEditingContact(null); }}>
+                <Ionicons name="close" size={24} color={c.text} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[styles.modalLabel, { color: c.subText }]}>Name</Text>
+            <View style={[styles.modalInput, { backgroundColor: c.inputBg, borderColor: c.inputBorder }]}>
+              <Ionicons name="person-outline" size={17} color={c.icon} />
+              <TextInput
+                style={[styles.modalInputText, { color: c.text }]}
+                placeholder="Enter contact name"
+                placeholderTextColor={c.placeholder}
+                value={editName}
+                onChangeText={setEditName}
+              />
+            </View>
+
+            <Text style={[styles.modalLabel, { color: c.subText }]}>Mobile Number</Text>
+            <View style={[styles.modalInput, { backgroundColor: c.inputBg, borderColor: c.inputBorder }]}>
+              <Ionicons name="call-outline" size={17} color={c.icon} />
+              <TextInput
+                style={[styles.modalInputText, { color: c.text }]}
+                placeholder="e.g. +91 9876543210"
+                placeholderTextColor={c.placeholder}
+                value={editMobile}
+                onChangeText={setEditMobile}
+                keyboardType="phone-pad"
+              />
+            </View>
+
+            <TouchableOpacity
+              onPress={handleSaveEdit}
+              style={styles.modalBtn}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.modalBtnText}>Save Changes</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Contact Options Modal ── */}
+      <Modal animationType="fade" transparent visible={optionsModalVisible} onRequestClose={() => setOptionsModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalSheet, { backgroundColor: c.card }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: c.text }]}>{selectedContact?.name}</Text>
+              <TouchableOpacity onPress={() => setOptionsModalVisible(false)}>
+                <Ionicons name="close" size={24} color={c.text} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ gap: 10, marginTop: 10 }}>
+              {/* Option: Pin/Unpin */}
+              <TouchableOpacity
+                onPress={() => {
+                  setOptionsModalVisible(false);
+                  handleTogglePin(selectedContact._id, selectedContact.isPinned);
+                }}
+                style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+              >
+                <Ionicons name="pin-outline" size={20} color="#2563EB" />
+                <Text style={[styles.optionText, { color: c.text }]}>
+                  {selectedContact?.isPinned ? 'Unpin Chat' : 'Pin Chat'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Option: Add Contact (virtual) or Edit Contact (saved) */}
+              <TouchableOpacity
+                onPress={() => {
+                  setOptionsModalVisible(false);
+                  if (selectedContact?.isVirtual) {
+                    setNewContactName('');
+                    setNewContactMobile(selectedContact.mobile);
+                    setModalVisible(true);
+                  } else {
+                    startEditContact(selectedContact);
+                  }
+                }}
+                style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+              >
+                <Ionicons name="pencil-outline" size={20} color="#2563EB" />
+                <Text style={[styles.optionText, { color: c.text }]}>
+                  {selectedContact?.isVirtual ? 'Add Contact' : 'Edit Contact'}
+                </Text>
+              </TouchableOpacity>
+
+              {selectedContact?.contactUserId && (
+                <>
+                  {/* Option: Mark Read/Unread */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setOptionsModalVisible(false);
+                      handleToggleUnread(selectedContact);
+                    }}
+                    style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+                  >
+                    <Ionicons name="mail-outline" size={20} color="#2563EB" />
+                    <Text style={[styles.optionText, { color: c.text }]}>
+                      {selectedContact?.unreadCount > 0 || selectedContact?.isMarkedUnread ? 'Mark as Read' : 'Mark as Unread'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Option: Delete Chat */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setOptionsModalVisible(false);
+                      confirmClearChat(selectedContact.contactUserId._id, selectedContact.name);
+                    }}
+                    style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                    <Text style={[styles.optionText, { color: '#EF4444' }]}>Delete Chat</Text>
+                  </TouchableOpacity>
+
+                  {/* Option: Mute/Unmute */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setOptionsModalVisible(false);
+                      handleToggleMute(selectedContact.contactUserId._id, selectedContact.isMuted);
+                    }}
+                    style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+                  >
+                    <Ionicons name={selectedContact?.isMuted ? "volume-high-outline" : "volume-mute-outline"} size={20} color="#2563EB" />
+                    <Text style={[styles.optionText, { color: c.text }]}>
+                      {selectedContact?.isMuted ? 'Unmute Notifications' : 'Mute Notifications'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Option: Block/Unblock */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setOptionsModalVisible(false);
+                      handleToggleBlock(selectedContact.contactUserId._id, selectedContact.isBlocked);
+                    }}
+                    style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+                  >
+                    <Ionicons name="ban-outline" size={20} color="#EF4444" />
+                    <Text style={[styles.optionText, { color: '#EF4444' }]}>
+                      {selectedContact?.isBlocked ? 'Unblock User' : 'Block User'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Option: Report */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setOptionsModalVisible(false);
+                      confirmReportUser(selectedContact.contactUserId._id, selectedContact.name);
+                    }}
+                    style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+                  >
+                    <Ionicons name="warning-outline" size={20} color="#EF4444" />
+                    <Text style={[styles.optionText, { color: '#EF4444' }]}>Report & Block</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {!selectedContact?.contactUserId && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setOptionsModalVisible(false);
+                    handleInviteWhatsApp(selectedContact.mobile);
+                  }}
+                  style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+                >
+                  <Ionicons name="logo-whatsapp" size={20} color="#22C55E" />
+                  <Text style={[styles.optionText, { color: c.text }]}>Invite via WhatsApp</Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Option: Remove Contact (only for saved contacts) */}
+              {!selectedContact?.isVirtual && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setOptionsModalVisible(false);
+                    confirmRemoveContact(selectedContact._id, selectedContact.name);
+                  }}
+                  style={[styles.optionRow, { backgroundColor: isDark ? '#252540' : '#F1F5F9' }]}
+                >
+                  <Ionicons name="person-remove-outline" size={20} color="#EF4444" />
+                  <Text style={[styles.optionText, { color: '#EF4444' }]}>Remove Contact</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         </View>
       </Modal>
@@ -336,6 +715,35 @@ const styles = StyleSheet.create({
   avatarText: { color: '#3B82F6', fontWeight: '700', fontSize: 16 },
   contactTopRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 },
   contactName: { fontSize: 15, fontWeight: '700' },
+  blockedBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+  },
+  blockedBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 14,
+    gap: 12,
+  },
+  optionText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  unreadGreenDot: {
+    backgroundColor: '#10B981',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 4,
+    marginTop: 4,
+  },
   contactTime: { fontSize: 11 },
   contactPreview: { fontSize: 13 },
   unreadBadge: {

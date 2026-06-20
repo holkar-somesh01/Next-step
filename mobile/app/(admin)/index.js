@@ -244,37 +244,51 @@ export default function AdminDashboard() {
           {activeTab === 'schemes' ? (
             <View style={styles.tabContent}>
               {recentSchemes.length > 0 ? (
-                recentSchemes.map((item) => (
-                  <View key={item._id} style={[styles.feedCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
-                    <View style={styles.feedCardHeader}>
-                      <View style={[styles.tagWrapper, { backgroundColor: dark ? '#2e2b54' : '#EEF2FF' }]}>
-                        <Text style={[styles.tagText, { color: dark ? '#A5B4FC' : '#4F46E5' }]}>{item.category || 'General'}</Text>
+                <>
+                  {recentSchemes.map((item) => (
+                    <TouchableOpacity 
+                      key={item._id} 
+                      onPress={() => router.push(`/(admin)/scheme-details?id=${item._id}`)}
+                      style={[styles.feedCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.feedCardHeader}>
+                        <View style={[styles.tagWrapper, { backgroundColor: dark ? '#2e2b54' : '#EEF2FF' }]}>
+                          <Text style={[styles.tagText, { color: dark ? '#A5B4FC' : '#4F46E5' }]}>{item.category || 'General'}</Text>
+                        </View>
+                        <View style={styles.feedCardActions}>
+                          <TouchableOpacity 
+                            onPress={() => router.push({ pathname: '/(admin)/schemes', params: { id: item._id, edit: true } })}
+                            style={[styles.miniButton, { backgroundColor: dark ? '#252540' : '#EFF6FF' }]}
+                          >
+                            <Ionicons name="pencil" size={15} color={dark ? '#A5B4FC' : '#2563EB'} />
+                          </TouchableOpacity>
+                          <TouchableOpacity 
+                            onPress={() => handleDeleteScheme(item._id)}
+                            style={[styles.miniButton, { backgroundColor: dark ? '#521b1b' : '#FEF2F2' }]}
+                          >
+                            <Ionicons name="trash-outline" size={15} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                      <View style={styles.feedCardActions}>
-                        <TouchableOpacity 
-                          onPress={() => router.push({ pathname: '/(admin)/schemes', params: { id: item._id, edit: true } })}
-                          style={[styles.miniButton, { backgroundColor: dark ? '#252540' : '#EFF6FF' }]}
-                        >
-                          <Ionicons name="pencil" size={15} color={dark ? '#A5B4FC' : '#2563EB'} />
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                          onPress={() => handleDeleteScheme(item._id)}
-                          style={[styles.miniButton, { backgroundColor: dark ? '#521b1b' : '#FEF2F2' }]}
-                        >
-                          <Ionicons name="trash-outline" size={15} color="#EF4444" />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                    <Text style={[styles.feedCardTitle, { color: c.text }]}>{item.name}</Text>
-                    <Text style={[styles.feedCardDesc, { color: c.subText }]} numberOfLines={2}>{item.description}</Text>
-                    {item.deadline && (
-                      <View style={styles.feedCardFooter}>
-                        <Ionicons name="calendar-outline" size={13} color={c.subText} />
-                        <Text style={[styles.feedCardFooterText, { color: c.subText }]}>Deadline: {item.deadline}</Text>
-                      </View>
-                    )}
-                  </View>
-                ))
+                      <Text style={[styles.feedCardTitle, { color: c.text }]}>{item.name}</Text>
+                      <Text style={[styles.feedCardDesc, { color: c.subText }]} numberOfLines={2}>{item.description}</Text>
+                      {item.deadline && (
+                        <View style={styles.feedCardFooter}>
+                          <Ionicons name="calendar-outline" size={13} color={c.subText} />
+                          <Text style={[styles.feedCardFooterText, { color: c.subText }]}>Deadline: {item.deadline}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity 
+                    onPress={() => router.push('/(admin)/scheme-list')}
+                    style={[styles.viewAllButton, { backgroundColor: dark ? '#2e2b54' : '#EEF2FF' }]}
+                  >
+                    <Text style={[styles.viewAllText, { color: dark ? '#A5B4FC' : '#4F46E5' }]}>View All Schemes</Text>
+                    <Ionicons name="arrow-forward" size={16} color={dark ? '#A5B4FC' : '#4F46E5'} />
+                  </TouchableOpacity>
+                </>
               ) : (
                 <View style={styles.emptyState}>
                   <Ionicons name="document-text-outline" size={44} color={c.subText} style={{ marginBottom: 8 }} />
@@ -598,6 +612,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     textAlign: 'center',
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 14,
+    marginTop: 4,
+    marginBottom: 8,
+    gap: 6,
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   fab: {
     position: 'absolute',

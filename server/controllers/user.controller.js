@@ -365,6 +365,102 @@ const updatePushToken = asyncHandler(async (req, res) => {
     res.json({ success: true, message: 'Push token updated successfully' });
 });
 
+// @desc    Block a user
+// @route   POST /api/auth/block
+// @access  Private
+const blockUser = asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    const currentUser = await User.findById(req.user._id);
+
+    if (!currentUser.blockedUsers) {
+        currentUser.blockedUsers = [];
+    }
+
+    if (!currentUser.blockedUsers.includes(userId)) {
+        currentUser.blockedUsers.push(userId);
+        await currentUser.save();
+    }
+
+    res.status(200).json({ success: true, message: 'User blocked successfully', userId });
+});
+
+// @desc    Unblock a user
+// @route   POST /api/auth/unblock
+// @access  Private
+const unblockUser = asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    const currentUser = await User.findById(req.user._id);
+
+    if (currentUser.blockedUsers) {
+        currentUser.blockedUsers = currentUser.blockedUsers.filter(id => id.toString() !== userId);
+        await currentUser.save();
+    }
+
+    res.status(200).json({ success: true, message: 'User unblocked successfully', userId });
+});
+
+// @desc    Mute notifications for a user
+// @route   POST /api/auth/mute
+// @access  Private
+const muteUser = asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    const currentUser = await User.findById(req.user._id);
+
+    if (!currentUser.mutedUsers) {
+        currentUser.mutedUsers = [];
+    }
+
+    if (!currentUser.mutedUsers.includes(userId)) {
+        currentUser.mutedUsers.push(userId);
+        await currentUser.save();
+    }
+
+    res.status(200).json({ success: true, message: 'User notifications muted successfully', userId });
+});
+
+// @desc    Unmute notifications for a user
+// @route   POST /api/auth/unmute
+// @access  Private
+const unmuteUser = asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    const currentUser = await User.findById(req.user._id);
+
+    if (currentUser.mutedUsers) {
+        currentUser.mutedUsers = currentUser.mutedUsers.filter(id => id.toString() !== userId);
+        await currentUser.save();
+    }
+
+    res.status(200).json({ success: true, message: 'User notifications unmuted successfully', userId });
+});
+
+// @desc    Report a user (and automatically block them)
+// @route   POST /api/auth/report
+// @access  Private
+const reportUser = asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    const userToReport = await User.findById(userId);
+
+    if (!userToReport) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    userToReport.reportCount = (userToReport.reportCount || 0) + 1;
+    await userToReport.save();
+
+    const currentUser = await User.findById(req.user._id);
+    if (!currentUser.blockedUsers) {
+        currentUser.blockedUsers = [];
+    }
+
+    if (!currentUser.blockedUsers.includes(userId)) {
+        currentUser.blockedUsers.push(userId);
+        await currentUser.save();
+    }
+
+    res.status(200).json({ success: true, message: 'User reported and blocked successfully', userId });
+});
+
 module.exports = {
     registerUser,
     loginUser,
@@ -380,5 +476,10 @@ module.exports = {
     verifyAppLockCode,
     resetAppLockCode,
     disableAppLockCode,
-    updatePushToken
+    updatePushToken,
+    blockUser,
+    unblockUser,
+    muteUser,
+    unmuteUser,
+    reportUser
 };

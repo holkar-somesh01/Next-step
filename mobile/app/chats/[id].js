@@ -19,6 +19,7 @@ import { useGetUserByIdQuery } from '../../redux/api/userApi';
 import { useTheme } from '../../context/ThemeContext';
 import io from 'socket.io-client';
 import AppLock from '../../components/AppLock';
+import { encryptMessage, decryptMessage, getPrivateKey } from '../../utils/crypto';
 
 const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL?.replace('/api', '');
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL?.replace('/api', '');
@@ -42,10 +43,12 @@ export default function ChatDetailScreen() {
   const [message, setMessage] = useState('');
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [replyingToMessage, setReplyingToMessage] = useState(null);
 
   const socket = useRef(null);
   const flatListRef = useRef(null);
   const inputRef = useRef(null);
+  const lastTap = useRef({ time: 0, msgId: null });
 
   const { data: receiver } = useGetUserByIdQuery(receiverId, {
     skip: !receiverId || !currentUser,
@@ -60,6 +63,21 @@ export default function ChatDetailScreen() {
   const [editMsgMutation] = useEditMessageMutation();
   const [deleteMsgMutation] = useDeleteMessageMutation();
   const [chatMessages, setChatMessages] = useState([]);
+  const [privateKey, setPrivateKey] = useState(null);
+
+  const privateKeyRef = useRef(null);
+  const receiverPubKeyRef = useRef(null);
+
+  useEffect(() => {
+    if (currentUser?._id) {
+      getPrivateKey(currentUser._id).then(key => setPrivateKey(key));
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    privateKeyRef.current = privateKey;
+    receiverPubKeyRef.current = receiver?.publicKey;
+  }, [privateKey, receiver?.publicKey]);
 
   const roomId = currentUser && receiverId
     ? [currentUser._id, receiverId].sort().join('_')
@@ -70,8 +88,21 @@ export default function ChatDetailScreen() {
   }, [currentUser]);
 
   useEffect(() => {
-    if (history) setChatMessages(history);
-  }, [history]);
+    if (history) {
+      if (privateKey && receiver?.publicKey) {
+        const decryptedHistory = history.map(m => {
+          if (m.isEncrypted && m.encryptedContent && m.iv) {
+            const decrypted = decryptMessage(m.encryptedContent, m.iv, receiver.publicKey, privateKey);
+            return { ...m, message: decrypted || "[Encryption Error: Decryption Failed]" };
+          }
+          return m;
+        });
+        setChatMessages(decryptedHistory);
+      } else {
+        setChatMessages(history);
+      }
+    }
+  }, [history, privateKey, receiver?.publicKey]);
 
   useEffect(() => {
     if (!roomId) return;
@@ -79,7 +110,14 @@ export default function ChatDetailScreen() {
     socket.current.emit('join_room', roomId);
     
     socket.current.on('receive_message', (data) => {
-      setChatMessages(prev => [...prev, data]);
+      let finalData = { ...data };
+      const pk = privateKeyRef.current;
+      const pubk = receiverPubKeyRef.current;
+      if (data.isEncrypted && data.encryptedContent && pk && pubk) {
+          const decrypted = decryptMessage(data.encryptedContent, data.iv, pubk, pk);
+          finalData.message = decrypted || "[Encryption Error: Decryption Failed]";
+      }
+      setChatMessages(prev => [...prev, finalData]);
     });
 
     socket.current.on('message_edited', (data) => {
@@ -117,10 +155,34 @@ export default function ChatDetailScreen() {
     if (editingMessageId) {
       // Edit message flow
       try {
-        await editMsgMutation({ messageId: editingMessageId, message: message.trim() }).unwrap();
-        socket.current.emit('edit_message', { messageId: editingMessageId, message: message.trim(), room: roomId });
+        let isEncrypted = false;
+        let encryptedContent = null;
+        let iv = null;
+        let encryptionVersion = 1;
+        let finalMessage = message.trim();
+
+        if (privateKey && receiver?.publicKey) {
+          const encrypted = encryptMessage(finalMessage, receiver.publicKey, privateKey);
+          if (encrypted) {
+            encryptedContent = encrypted.encryptedContent;
+            iv = encrypted.iv;
+            isEncrypted = true;
+          }
+        }
+
+        const payload = { 
+          messageId: editingMessageId, 
+          message: isEncrypted ? undefined : finalMessage,
+          encryptedContent,
+          iv,
+          isEncrypted,
+          encryptionVersion
+        };
+
+        await editMsgMutation(payload).unwrap();
+        socket.current.emit('edit_message', { ...payload, message: finalMessage, room: roomId });
         setChatMessages(prev =>
-          prev.map(m => (m._id === editingMessageId ? { ...m, message: message.trim() } : m))
+          prev.map(m => (m._id === editingMessageId ? { ...m, message: finalMessage } : m))
         );
         setEditingMessageId(null);
         setMessage('');
@@ -131,21 +193,63 @@ export default function ChatDetailScreen() {
     } else {
       // Send new message flow
       const tempId = `temp-${Date.now()}`;
+      
+      let isEncrypted = false;
+      let encryptedContent = null;
+      let iv = null;
+      let encryptionVersion = 1;
+      let finalMessage = message.trim();
+
+      if (privateKey && receiver?.publicKey) {
+        const encrypted = encryptMessage(finalMessage, receiver.publicKey, privateKey);
+        if (encrypted) {
+          encryptedContent = encrypted.encryptedContent;
+          iv = encrypted.iv;
+          isEncrypted = true;
+        }
+      }
       const messageData = {
         _id: tempId,
         sender: currentUser._id,
         receiver: receiverId,
-        message: message.trim(),
+        message: finalMessage,
+        encryptedContent,
+        iv,
+        isEncrypted,
+        encryptionVersion,
         room: roomId,
         createdAt: new Date().toISOString(),
+        replyTo: replyingToMessage ? {
+          _id: replyingToMessage._id,
+          message: replyingToMessage.message,
+          sender: {
+            _id: replyingToMessage.sender,
+            name: replyingToMessage.sender === currentUser._id 
+              ? currentUser.name 
+              : (receiver?.name || contactName || 'User')
+          }
+        } : null
       };
+      
+      const currentReplyToId = replyingToMessage?._id;
+      setReplyingToMessage(null);
       
       // Optimitic update
       setChatMessages(prev => [...prev, messageData]);
       setMessage('');
       
       try {
-        const result = await sendMsgMutation({ receiverId, message: messageData.message, room: roomId }).unwrap();
+        const result = await sendMsgMutation({ 
+          receiverId, 
+          message: isEncrypted ? undefined : finalMessage, 
+          encryptedContent,
+          iv,
+          isEncrypted,
+          encryptionVersion,
+          room: roomId,
+          replyTo: currentReplyToId
+        }).unwrap();
+        // Provide the decrypted message back for the sender's own sockets if needed (e.g. web/mobile sync), but here it's purely for the recipient
         socket.current.emit('send_message', result);
         
         // Swap temp message with official database record containing real _id
@@ -176,8 +280,22 @@ export default function ChatDetailScreen() {
     );
   };
 
+  const handleMessagePress = (msg) => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+    if (lastTap.current.msgId === msg._id && (now - lastTap.current.time < DOUBLE_PRESS_DELAY)) {
+      // Double tap detected
+      setReplyingToMessage(msg);
+      setEditingMessageId(null); // Clear editing when replying
+      setShowEmojiPicker(false);
+      inputRef.current?.focus();
+    }
+    lastTap.current = { time: now, msgId: msg._id };
+  };
+
   const startEditMessage = (msg) => {
     setEditingMessageId(msg._id);
+    setReplyingToMessage(null); // Clear replying when editing
     setMessage(msg.message);
     setShowEmojiPicker(false);
     inputRef.current?.focus();
@@ -280,7 +398,8 @@ export default function ChatDetailScreen() {
                   return (
                     <View style={[styles.msgRow, { justifyContent: isMine ? 'flex-end' : 'flex-start' }]}>
                       <TouchableOpacity
-                        activeOpacity={isMine ? 0.8 : 1}
+                        activeOpacity={0.85}
+                        onPress={() => handleMessagePress(item)}
                         onLongPress={() => handleLongPressMessage(item)}
                         style={[
                           styles.msgBubble,
@@ -294,6 +413,29 @@ export default function ChatDetailScreen() {
                               },
                         ]}
                       >
+                        {item.replyTo && item.replyTo.message && (
+                          <View style={[
+                            styles.replyQuoteBubble,
+                            isMine
+                              ? { backgroundColor: 'rgba(255, 255, 255, 0.15)', borderLeftColor: '#FFFFFF' }
+                              : { backgroundColor: isDark ? '#1a1a30' : '#F1F5F9', borderLeftColor: '#2563EB' }
+                          ]}>
+                            <Text style={[
+                              styles.replyQuoteSender,
+                              { color: isMine ? '#E0F2FE' : '#2563EB' }
+                            ]} numberOfLines={1}>
+                              {item.replyTo.sender?._id === currentUser._id 
+                                ? 'You' 
+                                : (item.replyTo.sender?.name || contactName || receiver?.name || 'User')}
+                            </Text>
+                            <Text style={[
+                              styles.replyQuoteText,
+                              { color: isMine ? 'rgba(255,255,255,0.85)' : c.subText }
+                            ]} numberOfLines={1}>
+                              {item.replyTo.message}
+                            </Text>
+                          </View>
+                        )}
                         <Text style={[styles.msgText, { color: isMine ? '#fff' : c.text }]}>
                           {item.message}
                         </Text>
@@ -318,6 +460,29 @@ export default function ChatDetailScreen() {
               <Text style={[styles.editingText, { color: c.text }]}>Editing message...</Text>
               <TouchableOpacity 
                 onPress={() => { setEditingMessageId(null); setMessage(''); }}
+                style={styles.cancelEditBtn}
+              >
+                <Ionicons name="close-circle" size={18} color={c.subText} />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* ── Replying Indicator Banner ── */}
+          {replyingToMessage && (
+            <View style={[styles.editingBanner, { backgroundColor: isDark ? '#1e1e35' : '#F1F5F9', borderTopColor: c.cardBorder }]}>
+              <Ionicons name="arrow-undo" size={15} color="#2563EB" />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.editingText, { color: c.text }]} numberOfLines={1}>
+                  Replying to {replyingToMessage.sender === currentUser._id 
+                    ? 'yourself' 
+                    : (contactName || receiver?.name || 'User')}
+                </Text>
+                <Text style={{ fontSize: 11, color: c.subText }} numberOfLines={1}>
+                  {replyingToMessage.message}
+                </Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => setReplyingToMessage(null)}
                 style={styles.cancelEditBtn}
               >
                 <Ionicons name="close-circle" size={18} color={c.subText} />
@@ -431,6 +596,21 @@ const styles = StyleSheet.create({
   msgText: { fontSize: 14, lineHeight: 20 },
   msgMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginTop: 5 },
   msgTime: { fontSize: 10, fontWeight: '500' },
+  replyQuoteBubble: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    marginBottom: 6,
+  },
+  replyQuoteSender: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  replyQuoteText: {
+    fontSize: 12,
+  },
 
   editingBanner: {
     flexDirection: 'row',

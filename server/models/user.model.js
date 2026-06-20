@@ -46,6 +46,18 @@ const userSchema = new mongoose.Schema({
     expoPushToken: {
         type: String,
         default: '',
+    },
+    blockedUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    mutedUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    reportCount: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 

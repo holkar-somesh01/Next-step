@@ -16,7 +16,14 @@ export const authApi = apiSlice.injectEndpoints({
         body: userData,
       }),
     }),
+    updatePublicKey: builder.mutation({
+      query: (data) => ({
+        url: '/auth/public-key',
+        method: 'PUT',
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useUpdatePublicKeyMutation } = authApi;

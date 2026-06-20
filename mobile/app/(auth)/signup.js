@@ -11,17 +11,22 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  Image,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useRouter, Link } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useRegisterMutation } from '../../redux/api/authApi';
+import { useRegisterMutation, useUpdatePublicKeyMutation } from '../../redux/api/authApi';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../../redux/slices/authSlice';
+import { generateAndStoreKeyPair } from '../../utils/crypto';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SignupScreen() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { isDark: dark, colors: c } = useTheme();
 
   const [name, setName] = useState('');
@@ -75,6 +80,7 @@ export default function SignupScreen() {
   }, [passwordFocused]);
 
   const [register, { isLoading }] = useRegisterMutation();
+  const [updatePublicKey] = useUpdatePublicKeyMutation();
 
   const handleSignup = async () => {
     if (!name || !email || !password || !mobile) {
@@ -82,7 +88,15 @@ export default function SignupScreen() {
       return;
     }
     try {
-      await register({ name, email, password, mobile, role: 'student' }).unwrap();
+      const userData = await register({ name, email, password, mobile, role: 'student' }).unwrap();
+      
+      // Auto-login to sync keys and token
+      // Wait, register endpoint currently might not return a token.
+      // If it does not, they have to login anyway.
+      // Assuming register doesn't login automatically according to standard flows,
+      // we will let login handle key generation. However, if register does return token,
+      // we can do it here. The current code redirects to login:
+      
       showToast('Account created successfully!', 'success');
       setTimeout(() => {
         router.replace({ pathname: '/(auth)/login', params: { registered: 'true' } });
@@ -127,7 +141,11 @@ export default function SignupScreen() {
           style={styles.header}
         >
           <View style={styles.iconRing}>
-            <Ionicons name="person-add" size={32} color="#fff" />
+            <Image
+              source={require('../../assets/images/logo.png')}
+              style={styles.logoIcon}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.headingTitle}>Create Account</Text>
           <Text style={styles.headingSubtitle}>Join Next Step to start learning</Text>
@@ -326,6 +344,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 3,
+  },
+  logoIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
   },
   headingTitle: {
     color: '#fff',

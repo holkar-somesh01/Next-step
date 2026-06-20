@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { registerUser, loginUser, getUsers, getUserById, getMe, updateProfile, changePassword, setSecretCode, verifySecretCode, resetSecretCode, setAppLockCode, verifyAppLockCode, resetAppLockCode, disableAppLockCode, updatePushToken } = require('../controllers/user.controller');
+const { registerUser, loginUser, getUsers, getUserById, getMe, updateProfile, changePassword, setSecretCode, verifySecretCode, resetSecretCode, setAppLockCode, verifyAppLockCode, resetAppLockCode, disableAppLockCode, updatePushToken, blockUser, unblockUser, muteUser, unmuteUser, reportUser } = require('../controllers/user.controller');
 const { protect, admin } = require('../middleware/auth.middleware');
 
 // Multer config for profile images
@@ -30,5 +30,11 @@ router.put('/reset-app-lock-code', protect, resetAppLockCode);
 router.post('/verify-app-lock-code', protect, verifyAppLockCode);
 router.put('/disable-app-lock-code', protect, disableAppLockCode);
 router.put('/push-token', protect, updatePushToken);
+
+router.post('/block', protect, blockUser);
+router.post('/unblock', protect, unblockUser);
+router.post('/mute', protect, muteUser);
+router.post('/unmute', protect, unmuteUser);
+router.post('/report', protect, reportUser);
 
 module.exports = router;

@@ -21,6 +21,14 @@ export const secretContactApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['SecretContact'],
     }),
+    updateSecretContact: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/secret-contacts/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['SecretContact'],
+    }),
   }),
 });
 
@@ -28,4 +36,5 @@ export const {
   useGetSecretContactsQuery,
   useAddSecretContactMutation,
   useDeleteSecretContactMutation,
+  useUpdateSecretContactMutation,
 } = secretContactApi;

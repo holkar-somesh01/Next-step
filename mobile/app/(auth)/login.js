@@ -11,14 +11,16 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  Image,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useRouter, Link, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
-import { useLoginMutation } from '../../redux/api/authApi';
+import { useLoginMutation, useUpdatePublicKeyMutation } from '../../redux/api/authApi';
 import { setCredentials } from '../../redux/slices/authSlice';
+import { generateAndStoreKeyPair, getPrivateKey } from '../../utils/crypto';
 
 const { width, height } = Dimensions.get('window');
 
@@ -80,6 +82,7 @@ export default function LoginScreen() {
   }, [passwordFocused]);
 
   const [login, { isLoading }] = useLoginMutation();
+  const [updatePublicKey] = useUpdatePublicKeyMutation();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -88,7 +91,26 @@ export default function LoginScreen() {
     }
     try {
       const userData = await login({ email, password }).unwrap();
+      
+      // Handle E2EE Keys
+      let privateKey = await getPrivateKey(userData._id);
+      let newPublicKey = null;
+      if (!privateKey || !userData.publicKey) {
+        const keys = await generateAndStoreKeyPair(userData._id);
+        userData.publicKey = keys.publicKey;
+        newPublicKey = keys.publicKey;
+      }
+
       dispatch(setCredentials({ user: userData, token: userData.token, justLoggedIn: true }));
+      
+      if (newPublicKey) {
+        try {
+          await updatePublicKey({ publicKey: newPublicKey }).unwrap();
+        } catch (err) {
+          console.error("Failed to sync public key:", err);
+        }
+      }
+
       showToast('Welcome back!', 'success');
       setTimeout(() => {
         if (userData.role === 'admin') {
@@ -143,7 +165,11 @@ export default function LoginScreen() {
           style={styles.header}
         >
           <View style={styles.iconRing}>
-            <Ionicons name="school" size={32} color="#fff" />
+            <Image
+              source={require('../../assets/images/logo.png')}
+              style={styles.logoIcon}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.headingTitle}>Welcome Back</Text>
           <Text style={styles.headingSubtitle}>Sign in to continue your journey</Text>
@@ -306,6 +332,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 3,
+  },
+  logoIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
   },
   headingTitle: {
     color: '#fff',

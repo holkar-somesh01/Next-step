@@ -137,7 +137,11 @@ export default function HomeScreen() {
                   <TouchableOpacity onPress={() => toggleSidebar(true)} style={{ marginRight: 12 }}>
                     <Ionicons name="menu-outline" size={28} color="#fff" />
                   </TouchableOpacity>
-                  <Ionicons name="school" size={24} color="#fff" />
+                  <Image
+                    source={require('../../assets/images/logo.png')}
+                    style={styles.logoHeader}
+                    resizeMode="contain"
+                  />
                   <Text style={styles.brandTitle}>Next Step</Text>
                 </View>
 
@@ -381,6 +385,11 @@ const styles = StyleSheet.create({
   header: { paddingTop: 20, paddingBottom: 28, paddingHorizontal: 20 },
   brandHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   brandTitle: { color: '#fff', fontSize: 20, fontWeight: '800', letterSpacing: 0.5 },
+  logoHeader: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+  },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -16,13 +16,25 @@ const getChatHistory = asyncHandler(async (req, res) => {
             { sender: senderId, receiver: receiverId },
             { sender: receiverId, receiver: senderId }
         ]
-    }).sort({ createdAt: 1 });
+    })
+    .sort({ createdAt: 1 })
+    .populate({
+        path: 'replyTo',
+        populate: { path: 'sender', select: 'name' }
+    });
 
     // Mark incoming messages from the receiver to the sender as read
     await Chat.updateMany(
         { sender: receiverId, receiver: senderId, isRead: false },
         { $set: { isRead: true } }
     );
+
+    // Clear manual unread status for this contact
+    const contact = await SecretContact.findOne({ owner: senderId, contactUserId: receiverId });
+    if (contact && contact.isMarkedUnread) {
+        contact.isMarkedUnread = false;
+        await contact.save();
+    }
 
     res.status(200).json(chats);
 });
@@ -31,18 +43,44 @@ const getChatHistory = asyncHandler(async (req, res) => {
 // @route   POST /api/chats
 // @access  Private
 const sendMessage = asyncHandler(async (req, res) => {
-    const { receiverId, message, room } = req.body;
+    const { receiverId, message, room, replyTo } = req.body;
     const senderId = req.user._id;
 
-    const newChat = await Chat.create({
+    // Check blocked status
+    const receiverUser = await User.findById(receiverId);
+    if (!receiverUser) {
+        res.status(404);
+        throw new Error('Receiver not found');
+    }
+
+    const isBlockedByReceiver = receiverUser.blockedUsers?.some(id => id.toString() === senderId.toString());
+    if (isBlockedByReceiver) {
+        res.status(400);
+        throw new Error('You are blocked by this user');
+    }
+
+    const sender = await User.findById(senderId);
+    const isBlockedByMe = sender?.blockedUsers?.some(id => id.toString() === receiverId.toString());
+    if (isBlockedByMe) {
+        res.status(400);
+        throw new Error('You have blocked this user. Unblock them to send a message.');
+    }
+
+    let newChat = await Chat.create({
         sender: senderId,
         receiver: receiverId,
         message,
-        room
+        room,
+        replyTo: replyTo || null
+    });
+
+    // Populate replyTo and its sender nestedly
+    newChat = await Chat.findById(newChat._id).populate({
+        path: 'replyTo',
+        populate: { path: 'sender', select: 'name' }
     });
 
     // Ensure the receiver has the sender in their secret contacts list
-    const sender = await User.findById(senderId);
     if (sender) {
         let contact = await SecretContact.findOne({
             owner: receiverId,
@@ -65,8 +103,9 @@ const sendMessage = asyncHandler(async (req, res) => {
         }
     }
 
-    // Send push notification if receiver is not active
-    if (!activeUsers.has(receiverId.toString())) {
+    // Send push notification if receiver is not active and hasn't muted the sender
+    const isMuted = receiverUser.mutedUsers?.some(id => id.toString() === senderId.toString());
+    if (!activeUsers.has(receiverId.toString()) && !isMuted) {
         sendPushNotification(receiverId).catch(err => console.error('[Notification] Error dispatching async push notification:', err));
     }
 
@@ -117,9 +156,49 @@ const deleteMessage = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Message deleted successfully', messageId });
 });
 
+// @desc    Clear chat history with a user
+// @route   DELETE /api/chats/clear/:receiverId
+// @access  Private
+const clearChatHistory = asyncHandler(async (req, res) => {
+    const { receiverId } = req.params;
+    const senderId = req.user._id;
+
+    await Chat.deleteMany({
+        $or: [
+            { sender: senderId, receiver: receiverId },
+            { sender: receiverId, receiver: senderId }
+        ]
+    });
+
+    res.status(200).json({ success: true, message: 'Chat history cleared successfully', receiverId });
+});
+
+// @desc    Mark all messages from sender as read
+// @route   PUT /api/chats/read/:senderId
+// @access  Private
+const markAsRead = asyncHandler(async (req, res) => {
+    const { senderId } = req.params;
+    const receiverId = req.user._id;
+
+    await Chat.updateMany(
+        { sender: senderId, receiver: receiverId, isRead: false },
+        { $set: { isRead: true } }
+    );
+
+    const contact = await SecretContact.findOne({ owner: receiverId, contactUserId: senderId });
+    if (contact) {
+        contact.isMarkedUnread = false;
+        await contact.save();
+    }
+
+    res.status(200).json({ success: true, message: 'All messages marked as read' });
+});
+
 module.exports = {
     getChatHistory,
     sendMessage,
     editMessage,
-    deleteMessage
+    deleteMessage,
+    clearChatHistory,
+    markAsRead
 };

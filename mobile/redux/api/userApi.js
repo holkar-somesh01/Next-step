@@ -81,6 +81,46 @@ export const userApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    blockUser: builder.mutation({
+      query: (data) => ({
+        url: '/auth/block',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['SecretContact'],
+    }),
+    unblockUser: builder.mutation({
+      query: (data) => ({
+        url: '/auth/unblock',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['SecretContact'],
+    }),
+    muteUser: builder.mutation({
+      query: (data) => ({
+        url: '/auth/mute',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['SecretContact'],
+    }),
+    unmuteUser: builder.mutation({
+      query: (data) => ({
+        url: '/auth/unmute',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['SecretContact'],
+    }),
+    reportUser: builder.mutation({
+      query: (data) => ({
+        url: '/auth/report',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['SecretContact'],
+    }),
   }),
 });
 
@@ -97,4 +137,9 @@ export const {
   useVerifyAppLockCodeMutation,
   useDisableAppLockCodeMutation,
   useUpdatePushTokenMutation,
+  useBlockUserMutation,
+  useUnblockUserMutation,
+  useMuteUserMutation,
+  useUnmuteUserMutation,
+  useReportUserMutation,
 } = userApi;

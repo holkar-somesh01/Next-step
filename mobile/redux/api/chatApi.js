@@ -29,6 +29,20 @@ export const chatApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Chat'],
     }),
+    clearChatHistory: builder.mutation({
+      query: (receiverId) => ({
+        url: `/chats/clear/${receiverId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['SecretContact', 'Chat'],
+    }),
+    markAsRead: builder.mutation({
+      query: (senderId) => ({
+        url: `/chats/read/${senderId}`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['SecretContact', 'Chat'],
+    }),
   }),
 });
 
@@ -37,4 +51,6 @@ export const {
   useSendMessageMutation,
   useEditMessageMutation,
   useDeleteMessageMutation,
+  useClearChatHistoryMutation,
+  useMarkAsReadMutation,
 } = chatApi;

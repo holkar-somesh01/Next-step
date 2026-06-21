@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
     socket.on('join_room', (data) => {
         socket.join(data);
         console.log(`User ${socket.id} joined room: ${data}`);
-        
+
         // Register active user when they join their personal user room (data length 24)
         if (typeof data === 'string' && /^[0-9a-fA-F]{24}$/.test(data)) {
             socketToUser.set(socket.id, data);
@@ -113,6 +113,17 @@ mongoose.connect(process.env.MONGO_URI)
     .catch((err) => {
         console.error('MongoDB connection error:', err);
     });
+app.get('/health', (req, res) => {
+    res.send('Next Step Server is Healthy...');
+});
+
+app.use((err, req, res, next) => {
+    const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
+    res.status(statusCode).json({
+        message: err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    });
+});
 
 module.exports = app;
 

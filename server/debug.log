@@ -511,3 +511,133 @@
 [2026-06-20T17:01:31.985Z] [middleware] protect authorized: user=bhagwan@gmail.com
 [2026-06-20T17:01:32.221Z] [middleware] protect called: path=/config/6a365f81781f4239205d0792_6a36782cc5a30124a4f60595, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
 [2026-06-20T17:01:32.297Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T05:16:29.983Z] [controller] registerUser called: body={"name":"Somesh Holkar ","email":"somesh@gmail.com","password":"Pass@123","mobile":"8482816761","role":"student"}
+[2026-06-21T05:16:30.043Z] [controller] registerUser failed: User already exists (somesh@gmail.com)
+[2026-06-21T05:19:35.420Z] [controller] registerUser called: body={"name":"Somesh Holkar ","email":"somesh@gmail.com","password":"Pass@123","mobile":"8482816761","role":"student"}
+[2026-06-21T05:19:35.484Z] [controller] registerUser failed: User already exists (somesh@gmail.com)
+[2026-06-21T05:29:08.805Z] [controller] registerUser called: body={"name":"Somesh Holkar ","email":"somesh@gmail.com","password":"Pass@123","mobile":"8482816761","role":"student"}
+[2026-06-21T05:36:47.259Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:36:47.336Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:38:35.489Z] [middleware] protect called: path=/secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:38:35.546Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:38:36.415Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:38:36.475Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:38:41.262Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:38:41.355Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:38:43.080Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:38:43.144Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:38:44.648Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:38:44.744Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:40:58.654Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
+[2026-06-21T05:40:58.745Z] [middleware] protect authorized: user=null
+[2026-06-21T05:54:00.030Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:54:00.097Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:54:02.049Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:54:02.122Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:54:29.105Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
+[2026-06-21T05:54:29.158Z] [middleware] protect authorized: user=null
+[2026-06-21T05:55:36.714Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:55:36.793Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:55:37.567Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:55:37.626Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:55:39.056Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
+[2026-06-21T05:55:39.149Z] [middleware] protect authorized: user=null
+[2026-06-21T05:57:28.191Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
+[2026-06-21T05:57:28.251Z] [middleware] protect authorized: user=null
+[2026-06-21T05:58:02.065Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
+[2026-06-21T05:58:02.126Z] [middleware] protect authorized: user=null
+[2026-06-21T05:58:39.131Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
+[2026-06-21T05:58:39.191Z] [middleware] protect authorized: user=null
+[2026-06-21T05:58:41.133Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:58:41.225Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:58:41.970Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:58:42.031Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:59:19.686Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:59:19.779Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:59:20.491Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T05:59:20.543Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T05:59:21.823Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
+[2026-06-21T05:59:21.921Z] [middleware] protect authorized: user=null
+[2026-06-21T05:59:48.594Z] [middleware] protect called: path=/me, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzY3ODJjYzVhMzAxMjRhNGY2MDU5NSIsImlhdCI6MTc4MTk1NDYxNywiZXhwIjoxNzg0NTQ2NjE3fQ.y205J6sbCk5WqzgKuioZhafbrso8YiBxZXxJrfaZ27g
+[2026-06-21T05:59:48.656Z] [middleware] protect authorized: user=null
+[2026-06-21T06:01:11.108Z] [controller] registerUser called: body={"name":"Bhagwan ","email":"bhagwan@gmail.com","password":"Pass@123","mobile":"8379832391","role":"student"}
+[2026-06-21T06:01:24.109Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:01:24.170Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:01:39.464Z] [middleware] protect called: path=/secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:01:39.525Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:01:40.358Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:01:40.422Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:01:44.421Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:01:44.483Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:01:46.741Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:01:46.820Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:02:00.669Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:02:00.731Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:02:00.947Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:02:01.009Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:02:03.093Z] [middleware] protect called: path=/user/6a3776a53e7b3ee29fc19b76, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:02:03.097Z] [middleware] protect called: path=/6a3776a53e7b3ee29fc19b76, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:02:03.161Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:02:03.166Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:02:03.170Z] [middleware] protect called: path=/config/6a3776a53e7b3ee29fc19b76_6a377e274ac32ad293d0b37e, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:02:03.239Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:02:14.667Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:02:14.720Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:02:15.299Z] [middleware] protect called: path=/6a3776a53e7b3ee29fc19b76, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:02:15.364Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:03:18.728Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTY4MywiZXhwIjoxNzg0NjEzNjgzfQ.oZg3mDp0QsNjGWYKfnNcSWebjYWP3cEzAI6-6Dn6tQg
+[2026-06-21T06:03:18.808Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:05:43.324Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:05:43.385Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:05:47.081Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:05:47.139Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:06:07.783Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:06:07.845Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:06:18.894Z] [middleware] protect called: path=/secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:06:18.964Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:06:22.939Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:06:22.994Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:06:23.214Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:06:23.271Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:06:25.866Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:06:25.929Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:06:32.546Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:06:32.607Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:06:35.171Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:06:35.231Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:06:36.290Z] [middleware] protect called: path=/user/6a3776a53e7b3ee29fc19b76, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:06:36.294Z] [middleware] protect called: path=/6a3776a53e7b3ee29fc19b76, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:06:36.299Z] [middleware] protect called: path=/config/6a3776a53e7b3ee29fc19b76_6a377e274ac32ad293d0b37e, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:06:36.364Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:06:36.367Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:06:36.378Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:06:41.456Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:06:41.535Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:06:41.919Z] [middleware] protect called: path=/6a3776a53e7b3ee29fc19b76, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:06:41.984Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:06:45.115Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:06:45.175Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:06:46.935Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:06:46.997Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:06:48.676Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMDIwNiwiZXhwIjoxNzg0NjEyMjA2fQ.Min5IiADXWmPUZ7EdA854Hep_IeqNsIPXOjoeuCgbfc
+[2026-06-21T06:06:48.738Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:14.735Z] [middleware] protect called: path=/push-token, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:14.798Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:41.148Z] [middleware] protect called: path=/verify-secret-code, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:41.211Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:43.085Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:43.137Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:44.963Z] [middleware] protect called: path=/user/6a377e274ac32ad293d0b37e, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:44.966Z] [middleware] protect called: path=/6a377e274ac32ad293d0b37e, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:44.970Z] [middleware] protect called: path=/config/6a3776a53e7b3ee29fc19b76_6a377e274ac32ad293d0b37e, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:45.059Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:45.062Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:45.067Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:53.051Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:53.108Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:53.512Z] [middleware] protect called: path=/6a377e274ac32ad293d0b37e, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:53.572Z] [middleware] protect authorized: user=somesh@gmail.com
+[2026-06-21T06:07:53.665Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3ZTI3NGFjMzJhZDI5M2QwYjM3ZSIsImlhdCI6MTc4MjAyMTk0MiwiZXhwIjoxNzg0NjEzOTQyfQ.BJzY69q6n-C9n-3OBOR8MtlWfPlyP19SHOwP8Tazlbk
+[2026-06-21T06:07:53.718Z] [middleware] protect authorized: user=bhagwan@gmail.com
+[2026-06-21T06:07:56.661Z] [middleware] protect called: path=/, authHeader=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzc3NmE1M2U3YjNlZTI5ZmMxOWI3NiIsImlhdCI6MTc4MjAyMjAzMywiZXhwIjoxNzg0NjE0MDMzfQ.Xooge-0BAS4SETL5kXQ1KIMjymAAqyYb_dC8EHvGTD4
+[2026-06-21T06:07:56.753Z] [middleware] protect authorized: user=somesh@gmail.com

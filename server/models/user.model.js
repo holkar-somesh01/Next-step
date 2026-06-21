@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    publicKey: {
+        type: String,
+        default: '',
+    },
     blockedUsers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

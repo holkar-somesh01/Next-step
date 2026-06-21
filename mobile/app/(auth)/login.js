@@ -92,8 +92,11 @@ export default function LoginScreen() {
       showToast('Please fill all fields', 'error');
       return;
     }
+    const trimmedEmail = email.trim().toLowerCase();
     try {
-      const userData = await login({ email, password }).unwrap();
+      const responseData = await login({ email: trimmedEmail, password }).unwrap();
+      const userData = { ...responseData }; // Make a mutable copy to prevent TypeError
+
       
       // Handle E2EE Keys
       let privateKey = await getPrivateKey(userData._id);
@@ -123,7 +126,22 @@ export default function LoginScreen() {
         }
       }, 1200);
     } catch (error) {
-      const message = error.data?.message || 'Invalid email or password';
+      console.log('Login Error Details:', error);
+      let message = 'Invalid email or password';
+      
+      if (error.status === 'FETCH_ERROR') {
+         message = 'Network Error: Cannot connect to server.';
+      } else if (error.data && error.data.message) {
+         message = error.data.message;
+      } else if (error.error) {
+         message = error.error;
+      } else if (error.message) {
+         message = error.message;
+      } else {
+         // Fallback to show exact error string if it's completely unknown
+         message = 'Error: ' + JSON.stringify(error);
+      }
+
       showToast(message, 'error');
     }
   };

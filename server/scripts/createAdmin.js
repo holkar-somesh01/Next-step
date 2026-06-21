@@ -11,7 +11,7 @@ const createAdmin = async () => {
         console.log('Connected to MongoDB');
 
         const adminEmail = 'admin@nextstep.com';
-        const adminPassword = 'adminpassword123'; // Change this!
+        const adminPassword = 'Admin@123'; // Change this!
 
         const adminExists = await User.findOne({ email: adminEmail });
 

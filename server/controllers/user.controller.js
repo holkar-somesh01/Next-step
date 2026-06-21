@@ -83,6 +83,7 @@ const loginUser = asyncHandler(async (req, res) => {
             secretCodeLength: user.secretCode ? (user.secretCodeLength || 6) : 0,
             hasAppLockCode: !!user.appLockCode,
             appLockCodeLength: user.appLockCode ? (user.appLockCodeLength || 6) : 0,
+            publicKey: user.publicKey || '',
             token: generateToken(user._id)
         });
     } else {
@@ -138,6 +139,7 @@ const getMe = asyncHandler(async (req, res) => {
         secretCodeLength: user.secretCode ? (user.secretCodeLength || 6) : 0,
         hasAppLockCode: !!user.appLockCode,
         appLockCodeLength: user.appLockCode ? (user.appLockCodeLength || 6) : 0,
+        publicKey: user.publicKey || '',
     });
 });
 
@@ -365,6 +367,24 @@ const updatePushToken = asyncHandler(async (req, res) => {
     res.json({ success: true, message: 'Push token updated successfully' });
 });
 
+// @desc    Update public key
+// @route   PUT /api/auth/public-key
+// @access  Private
+const updatePublicKey = asyncHandler(async (req, res) => {
+    const { publicKey } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    user.publicKey = publicKey || '';
+    await user.save();
+
+    res.json({ success: true, message: 'Public key updated successfully' });
+});
+
 // @desc    Block a user
 // @route   POST /api/auth/block
 // @access  Private
@@ -477,6 +497,7 @@ module.exports = {
     resetAppLockCode,
     disableAppLockCode,
     updatePushToken,
+    updatePublicKey,
     blockUser,
     unblockUser,
     muteUser,
